@@ -1,6 +1,6 @@
 //Select the timer display
 var timeEl = document.querySelector(".time");
-console.log(timeEl);
+
 //Set initial max time remaining
 var timeRemaining = 75;
 
