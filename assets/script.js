@@ -10,6 +10,8 @@ var currQuestion = 0;
 var quizContentEl = document.getElementById("quiz-content");
 //Create an array to hold button objects so they can collectively be updated using a loop in quizStart() and populateQuestion()
 var buttons = [];
+//Declare timerInterval in the global scope so it can be stopped when the game ends in endGame()
+var timerInterval;
 /*
 Stores questions as objects in an array. Each question has an answer 
 property which holds the correct answer and an options property which
@@ -98,10 +100,20 @@ function populateQuestion() {
 
 //Check if the user selected the correct answer
 function checkAnswer(event) {
+    var isCorrectEl = document.createElement("p");
+    quizContentEl.appendChild(isCorrectEl);
+
     //If user is incorrect, remove 10 seconds from their timer
     if (event.target.textContent != questions[currQuestion].answer) {
         timeRemaining -= 10;
-    }    
+        isCorrectEl.textContent = "Correct!";
+    } else {
+        isCorrectEl.textContent = "Wrong!";
+    }
+
+    var clearAns = setTimeout(function () {
+        quizContentEl.removeChild(isCorrectEl);
+    }, 2000);
     
     currQuestion++;
     
@@ -116,6 +128,12 @@ function checkAnswer(event) {
 }
 
 function endGame() {
+    console.log(quizContentEl);
+    //Stop timer
+    clearInterval(timerInterval);
+    //Update timer display
+    timeEl.textContent = "Time: " + timeRemaining;
+
     quizContentEl.children[0].textContent = "All done!";
     quizContentEl.children[1].textContent = "Your final score is " + timeRemaining + ".";
 
@@ -127,13 +145,14 @@ function endGame() {
 
 //Every 1000ms remove 1 second from the time remaining and update the time displayed
 function setTime() {
-    var timerInterval = setInterval(function() {
+    timerInterval = setInterval(function() {
         timeRemaining--;
         timeEl.textContent = "Time: " + timeRemaining;
 
-        //Clear time interval if time reaches 0 to end loop
+        //Clear time interval if time reaches 0
         if (timeRemaining === 0){  
             clearInterval(timerInterval);
+            endGame();
         }
     }, 1000);
 }
