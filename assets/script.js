@@ -12,6 +12,9 @@ var quizContentEl = document.getElementById("quiz-content");
 var buttons = [];
 //Declare timerInterval in the global scope so it can be stopped when the game ends in endGame()
 var timerInterval;
+//Create an array to reference highscores pulled from local storage. This we will cap at 10 highscores in setHighscore()
+var scores = [];
+
 /*
 Stores questions as objects in an array. Each question has an answer 
 property which holds the correct answer and an options property which
@@ -30,7 +33,7 @@ var questions = [
         ]},
     question2 = {
         question: "The condition in an if / else statement is enclosed within _____.",
-        answer: "3. parantheses",
+        answer: "3. parentheses",
         options: [
             "1. quotes",
             "2. curly brackets",
@@ -106,9 +109,9 @@ function checkAnswer(event) {
     //If user is incorrect, remove 10 seconds from their timer
     if (event.target.textContent != questions[currQuestion].answer) {
         timeRemaining -= 10;
-        isCorrectEl.textContent = "Correct!";
-    } else {
         isCorrectEl.textContent = "Wrong!";
+    } else {
+        isCorrectEl.textContent = "Correct!";
     }
 
     var clearAns = setTimeout(function () {
@@ -128,7 +131,8 @@ function checkAnswer(event) {
 }
 
 function endGame() {
-    console.log(quizContentEl);
+    //Compare score to highscores
+    setHighscore();
     //Stop timer
     clearInterval(timerInterval);
     //Update timer display
@@ -157,6 +161,62 @@ function setTime() {
     }, 1000);
 }
 
+function displayHighscore() {
 
+}
 
-//https://stackoverflow.com/questions/8260156/how-do-i-create-dynamic-variable-names-inside-a-loop
+function setHighscore() {
+    //Save all existing scores (if any) to an array called 'scores' starting from the lowest existing score. Array holds only 10 highest scores
+    for (var i=0; i<10; i++){
+        //If scores exist add them to an array called 'scores'
+        if (localStorage.getItem(i) !== null) {
+            scores.push(localStorage.getItem(i));
+        }
+    }
+    //If no scores exist, add the current score as the high score
+    if (scores.length == 0) {
+        localStorage.setItem(1, timeRemaining);
+    } 
+    //Cycle through every possible outcome for where the score lands on the highscores leaderboard and add new score accordingly
+    else { 
+        for (var i=0; i<scores.length; i++) {
+        //Highest possible score but not best score
+        if (timeRemaining > scores[i] && timeRemaining <= scores[i+1]) {
+            if (scores.length == 10) {
+                scores.shift();
+            }
+            scores.splice(i+1, 0, timeRemaining);
+            break;
+        }
+        //Best score
+        else if (timeRemaining > scores[i] && scores[i+1] == undefined) {
+            if (scores.length == 10){
+                scores.shift();
+            }
+            scores.push(timeRemaining);
+            break;
+        }
+        //Can go higher on the board. Skips the loop's cycle to compare current score to the next score in the array
+        else if (timeRemaining > scores[i]) {
+            continue;
+        } 
+        //Doesn't beat any score
+        else {
+            if (scores.length == 10) {
+                break;
+            }
+            //Add score anyways since there is room on the leaderboard
+            else {
+                scores.unshift(timeRemaining);
+                break;
+            }
+        }
+        }
+    }
+    //Sorts the array in reverse so the scores so the highest as a key value of 1 when stored to local storage 
+    scores.reverse();
+    //Add scores back to storage to update new score if any
+    for (var i=0; i<scores.length; i++){
+        localStorage.setItem(i+1, scores[i]);
+    }
+}
