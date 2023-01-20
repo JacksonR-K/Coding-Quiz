@@ -1,0 +1,27 @@
+body {
+    max-width: 80%;
+    display: flex;
+    flex-direction: column;
+}
+
+button {
+    background-color: rgb(158, 93, 219);
+    width:fit-content;
+}
+
+#view-scores {
+    border: none;
+    background-color: transparent;
+    color: rgb(158, 93, 219);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+}
+
+#quiz-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
