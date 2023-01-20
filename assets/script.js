@@ -2,6 +2,8 @@
 var timeEl = document.querySelector(".time");
 //Select the start quiz button
 var btnStartEl = document.getElementById("btn-start");
+//Select the 'View Highscores' button
+var btnViewScoresEl = document.getElementById("view-scores");
 //Set initial max time remaining
 var timeRemaining = 75;
 //Variable to save which question user is on. Used to reference the question array so 0 is actually question 1.
@@ -72,6 +74,9 @@ var questions = [
 //When start button is clicked, start quiz
 btnStartEl.addEventListener('click', quizStart);
 
+//When view highscores is clicked, display the highscores
+btnViewScoresEl.addEventListener('click', displayHighscore);
+
 //Start timer and generate first question on screen
 function quizStart() {
     //Remove the quiz description
@@ -116,7 +121,7 @@ function checkAnswer(event) {
 
     var clearAns = setTimeout(function () {
         quizContentEl.removeChild(isCorrectEl);
-    }, 2000);
+    }, 1000);
     
     currQuestion++;
     
@@ -161,18 +166,49 @@ function setTime() {
     }, 1000);
 }
 
+function getHighscore() {
+    //Save all existing scores (if any) to an array called 'scores' starting from the lowest existing score. Array holds only 10 highest scores
+    for (var i=0; i<10; i++){
+    //If scores exist add them to an array called 'scores'
+    if (localStorage.getItem(i) !== null) {
+        scores.push(localStorage.getItem(i));
+    }
+    }
+}
+
 function displayHighscore() {
+    getHighscore();
+    
+    var bodyEl = document.querySelector('body');
+    bodyEl.removeChild(bodyEl.children[0]);
+    quizContentEl.children[0].textContent = "Highscores";
+    quizContentEl.children[1].textContent = "";
+    if (quizContentEl.children[2] != null) {
+        quizContentEl.removeChild(quizContentEl.children[2]);
+    }
+    
+    for (var i=0; i<scores.length; i++){
+        var scoreDisplay = document.createElement("p");
+        scoreDisplay.textContent = scores[i];
+        bodyEl.appendChild(scoreDisplay);
+    }
+
+    var btnBackEl = document.createElement("button");
+    btnBackEl.textContent = "Go Back";
+    btnBackEl.addEventListener('click', function () { window.location.reload() });
+    quizContentEl.appendChild(btnBackEl);
+
+    var clearScoresEl = document.createElement("button");
+    clearScoresEl.textContent = "Clear Highscores";
+    clearScoresEl.addEventListener('click', function () { localStorage.clear(); scoreDisplay.textContent = ""; });
+    quizContentEl.appendChild(clearScoresEl);
 
 }
 
 function setHighscore() {
-    //Save all existing scores (if any) to an array called 'scores' starting from the lowest existing score. Array holds only 10 highest scores
-    for (var i=0; i<10; i++){
-        //If scores exist add them to an array called 'scores'
-        if (localStorage.getItem(i) !== null) {
-            scores.push(localStorage.getItem(i));
-        }
-    }
+    //Grab highscores from storage (if any exist)
+    getHighscore();
+    
     //If no scores exist, add the current score as the high score
     if (scores.length == 0) {
         localStorage.setItem(1, timeRemaining);
